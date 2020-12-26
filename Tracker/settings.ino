@@ -1,4 +1,21 @@
 
+void settings_load_defaults() {
+  DEBUG_FUNCTION_PRINTLN("using settings defaults");
+  config.version = CONFIG_VERSION;
+  config.interval = INTERVAL;
+  config.alarm_on =  DEFAULT_ALARM_ON;
+  config.debug = DEBUG ? 1 : 0;
+
+  strlcpy(config.key, KEY, sizeof(config.key));
+  strlcpy(config.sms_key, SMS_KEY, sizeof(config.sms_key));
+  strlcpy(config.sim_pin, SIM_PIN, sizeof(config.sim_pin));
+  strlcpy(config.apn, DEFAULT_APN, sizeof(config.apn));
+  strlcpy(config.user, DEFAULT_USER, sizeof(config.user));
+  strlcpy(config.pwd, DEFAULT_PASS, sizeof(config.pwd));
+  strlcpy(config.alarm_phone, DEFAULT_ALARM_SMS, sizeof(config.alarm_phone));
+  save_config = 1;
+}
+
 int settings_load(int readonly) {
   //load all settings from EEPROM
   byte tmp;
@@ -10,23 +27,12 @@ int settings_load(int readonly) {
   memcpy(&config, b, sizeof(Settings)); // copy byte array to temporary struct
 
 
-  if(!config.has_run) {
+  if(!config.has_run || config.version != CONFIG_VERSION) {
     //first run was not set, this is first even run of the board use config from tracker.h
-    DEBUG_FUNCTION_PRINTLN("first run, using defaults");
-    config.interval = INTERVAL;
-    config.alarm_on =  DEFAULT_ALARM_ON;
-    config.debug = DEBUG ? 1 : 0;
-
-    strlcpy(config.key, KEY, sizeof(config.key));
-    strlcpy(config.sms_key, SMS_KEY, sizeof(config.sms_key));
-    strlcpy(config.sim_pin, SIM_PIN, sizeof(config.sim_pin));
-    strlcpy(config.apn, DEFAULT_APN, sizeof(config.apn));
-    strlcpy(config.user, DEFAULT_USER, sizeof(config.user));
-    strlcpy(config.pwd, DEFAULT_PASS, sizeof(config.pwd));
-    strlcpy(config.alarm_phone, DEFAULT_ALARM_SMS, sizeof(config.alarm_phone));
+    DEBUG_FUNCTION_PRINTLN("first run...");
+    settings_load_defaults();
 
     config.has_run = false;
-    save_config = 1;
     defaults = 1;
   }
 
@@ -34,7 +40,7 @@ int settings_load(int readonly) {
   DEBUG_FUNCTION_PRINT("config.interval=");
   DEBUG_PRINTLN(config.interval);
 
-  if((config.interval == -1) || (config.interval < 0) || (config.interval > 5184000)) {
+  if((config.interval < 0) || (config.interval > 5184000)) {
     DEBUG_FUNCTION_PRINTLN("interval not found, setting default");
     config.interval = INTERVAL;
     save_config = 1;

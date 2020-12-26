@@ -1,5 +1,6 @@
 //OpenTracker config
 #define DEBUG 1               //debug console (0=disabled, 1=send diangostic messages, 2=also accept test commands)
+#define CONFIG_VERSION 3      //version of configuration struct
 
 //default settings (can be overwritten and stored in EEPRom)
 #define INTERVAL  15000        //how often to collect data (milli sec, 600000 - 10 mins)
