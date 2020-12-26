@@ -104,22 +104,6 @@ void setup() {
   //GSM setup
   gsm_setup();
 
-#if DEBUG == 10
-  debug_gsm_terminal();
-#endif
-
-#if DEBUG == 20
-  debug_gps_terminal();
-#endif
-
-#if DEBUG == 30
-  DEBUG_PRINTLN("Test Mode Console");
-  for (;;) {
-    status_led();
-    debug_check_input();
-  }
-#endif
-
   // reply to Alarm SMS command
   if (config.alarm_on) {
     sms_send_msg("Alarm Activated", config.alarm_phone);
@@ -168,9 +152,6 @@ void setup() {
       settings_save();
       save_config = 0;
     }
-
-    // allow debug terminal commands
-    debug_check_input();
 
     if (power_cutoff) // apply cut-off
       kill_power();
@@ -340,71 +321,4 @@ void loop() {
   }
 
   status_led();
-
-  debug_check_input();
-}
-
-// when DEBUG is defined >= 2 then serial monitor accepts test commands
-void debug_check_input() {
-#if DEBUG > 1
-#warning "Do not use DEBUG=2 in production code!"
-
-  if (!debug_enable)
-    return;
-
-  while (debug_port.available()) {
-    int c = debug_port.read();
-    DEBUG_FUNCTION_PRINT("Got: ");
-    DEBUG_FUNCTION_PRINTLN((char)c);
-    switch (c)
-    {
-    case 'r':
-      reboot();
-      break;
-    case 'l':
-      enter_low_power();
-      status_delay(15000);
-      exit_low_power();
-      break;
-    case 'd':
-      storage_dump();
-      storage_send_logs(0);
-      break;
-    case '^':
-      debug_gsm_terminal();
-      break;
-    case '|':
-      debug_gps_terminal();
-      break;
-    }
-  }
-#endif
-}
-
-void debug_gsm_terminal()
-{
-  DEBUG_FUNCTION_CALL();
-  for (;;) {
-    int c = debug_port.read();
-    if (c == '^') break;
-    if (c > 0)
-      gsm_port.write(c);
-    c = gsm_port.read();
-    if (c > 0)
-      debug_port.write(c);
-  }
-}
-
-void debug_gps_terminal()
-{
-  DEBUG_FUNCTION_CALL();
-  for (;;) {
-    int c = debug_port.read();
-    if (c == '|') break;
-    if (c > 0)
-      gps_port.write(c);
-    c = gps_port.read();
-    if (c > 0)
-      debug_port.write(c);
-  }
 }
