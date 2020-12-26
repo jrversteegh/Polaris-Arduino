@@ -12,7 +12,6 @@ int parse_receive_reply() {
 
   DEBUG_FUNCTION_CALL();
 
-  addon_event(ON_RECEIVE_STARTED);
   if (gsm_get_modem_status() == 4) {
     DEBUG_FUNCTION_PRINTLN("call interrupted");
     return 0; // abort
@@ -47,7 +46,7 @@ int parse_receive_reply() {
     }
     if(tmp==NULL) {
       // no data yet, keep looking
-      addon_delay(500);
+      status_delay(500);
       continue;
     }
 
@@ -60,7 +59,7 @@ int parse_receive_reply() {
 
     if(len==0) {
       // no data yet, keep looking
-      addon_delay(500);
+      status_delay(500);
       continue;
     }
 
@@ -106,7 +105,6 @@ int parse_receive_reply() {
       strlcat(cmd, modem_reply, sizeof(cmd));
     }
 	
-    addon_event(ON_RECEIVE_DATA);
     if (gsm_get_modem_status() == 4) {
       DEBUG_FUNCTION_PRINTLN("call interrupted");
       return 0; // abort
@@ -147,10 +145,8 @@ int parse_receive_reply() {
   if (ret) {
     //all data was received by server
     DEBUG_PRINT("Data was fully received by the server.");
-    addon_event(ON_RECEIVE_COMPLETED);
   } else {
     DEBUG_PRINT("Data was not received by the server.");
-    addon_event(ON_RECEIVE_FAILED);
   }
 
   return ret;

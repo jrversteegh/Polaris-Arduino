@@ -122,7 +122,6 @@ extern "C" void yield(void) {
 }
 
 void cpu_slow_down() {
-  addon_event(ON_CLOCK_PAUSE);
 
 #if defined(_SAM3XA_)
   SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk; // temp disable interrupt
@@ -137,11 +136,9 @@ void cpu_slow_down() {
   //TODO
 #endif
 
-  addon_event(ON_CLOCK_RESUME);
 }
 
 void cpu_full_speed() {
-  addon_event(ON_CLOCK_PAUSE);
 
 #if defined(_SAM3XA_)
   // re-init clocks to full speed
@@ -151,13 +148,11 @@ void cpu_full_speed() {
   //TODO
 #endif
 
-  addon_event(ON_CLOCK_RESUME);
 }
 
 void enter_low_power() {
   DEBUG_FUNCTION_CALL();
 
-  addon_event(ON_DEVICE_STANDBY);
 
   // enter standby/sleep mode
 
@@ -182,12 +177,10 @@ void exit_low_power() {
   gps_open();
   gps_wakeup();
 
-  addon_event(ON_DEVICE_WAKEUP);
 }
 
 void kill_power() {
   DEBUG_FUNCTION_PRINT("called");
-  addon_event(ON_DEVICE_KILL);
   // save as much power as possible
   gps_off();
   gps_close();

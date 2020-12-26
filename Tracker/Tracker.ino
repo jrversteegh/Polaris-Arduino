@@ -4,8 +4,6 @@
 #define debug_port SerialUSB
 #include "debug.h"
 
-#include "addon.h"
-
 //External libraries
 #include <TinyGPS.h>
 #include <DueFlashStorage.h>
@@ -81,9 +79,6 @@ void setup() {
 
   // read-only settings check
   settings_load(1);
-
-  //initialize addon board hardware
-  addon_init();
 
   //setting debug serial port
   DEBUG_FUNCTION_CALL();
@@ -177,9 +172,6 @@ void setup() {
     // allow debug terminal commands
     debug_check_input();
 
-    // keep updating analog sensors and battery
-    addon_delay(1000);
-
     if (power_cutoff) // apply cut-off
       kill_power();
   }
@@ -191,9 +183,6 @@ void setup() {
   // attempt clock update (over data connection)
   gsm_ntp_update();
 #endif
-
-  // setup addon board functionalities
-  addon_setup();
 
   DEBUG_FUNCTION_PRINTLN("before loop");
 
@@ -285,19 +274,19 @@ void loop() {
     DEBUG_PRINTLN("ms");
 
     if (time_diff < 1000) {
-      addon_delay(1000); // minimal wait to let addon code execute
+      status_delay(1000);
     } else {
       while (time_diff > 1000) {
-        addon_delay(1000); // minimal wait to let addon code execute
+        status_delay(1000);
         time_diff -= 1000;
         // break earlier if ignition status changed
         if (!ALWAYS_ON && IGNT_STAT != digitalRead(PIN_S_DETECT))
           time_diff = 0;
       }
-      addon_delay(time_diff);
+      status_delay(time_diff);
     }
   } else {
-    addon_delay(1000); // minimal wait to let addon code execute
+    status_delay(1000);
   }
 
   //start counting time
@@ -353,8 +342,6 @@ void loop() {
   status_led();
 
   debug_check_input();
-
-  addon_loop();
 }
 
 // when DEBUG is defined >= 2 then serial monitor accepts test commands
@@ -376,7 +363,7 @@ void debug_check_input() {
       break;
     case 'l':
       enter_low_power();
-      addon_delay(15000);
+      status_delay(15000);
       exit_low_power();
       break;
     case 'd':

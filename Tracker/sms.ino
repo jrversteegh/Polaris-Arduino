@@ -375,8 +375,6 @@ void sms_cmd_run(char *cmd, char *phone) {
       sms_send_msg("Powersave OFF", phone);
     }
   }
-  else
-    addon_sms_command(cmd, tmp, phone);
 }
 
 void sms_send_msg(const char *cmd, const char *phone) {

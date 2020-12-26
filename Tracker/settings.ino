@@ -135,12 +135,6 @@ int settings_load(int readonly) {
     save_config = 1;
   }
 
-  // let addon load its own settings (or initialize defaults)
-  if(defaults == 1)
-    addon_event(ON_SETTINGS_DEFAULT);
-  else
-    addon_event(ON_SETTINGS_LOAD);
-
   if (readonly)
     save_config = 0;
     
@@ -158,8 +152,6 @@ void settings_save() {
 
   //save all settings to flash
   dueFlashStorage.write(STORAGE_CONFIG_MAIN, (byte*)&config, sizeof(settings));
-
-  addon_event(ON_SETTINGS_SAVE);
 }
 
 int settings_compare(size_t offset, size_t len) {

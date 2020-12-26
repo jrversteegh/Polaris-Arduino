@@ -308,11 +308,10 @@ void collect_gps_data(bool useJSON) {
     if(fix == 1) {
       //fix was found
       DEBUG_FUNCTION_PRINTLN("Fix acquired");
-      addon_event(ON_LOCATION_FIXED);
       break;
     } else {
       // allow some other processing
-      addon_delay(5); 
+      status_delay(5); 
     }
   } while ((signed long)(millis() - timer) < GPS_COLLECT_TIMEOUT * 1000);
 
@@ -322,6 +321,5 @@ void collect_gps_data(bool useJSON) {
 
   if(fix != 1) {
     DEBUG_FUNCTION_PRINTLN("Fix not acquired, given up.");
-    addon_event(ON_LOCATION_LOST);
   }
 }

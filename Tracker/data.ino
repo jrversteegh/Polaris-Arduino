@@ -203,8 +203,6 @@ void collect_all_data(int ignitionState) {
     data_append_string(runningTimeString);
   }
 
-  addon_collect_data();
-
 #ifdef HTTP_USE_JSON
 #ifdef HTTP_USE_JSON_TIMESTAMP
   struct tm tm;

@@ -767,8 +767,6 @@ int gsm_set_apn()  {
   gsm_port.print(AT_DEACTIVATE);
   gsm_wait_for_reply(MODEM_CMDSET,0);
 
-  addon_event(ON_MODEM_ACTIVATION);
-  
   //set all APN data, dns, etc
   gsm_port.print(AT_CONTEXT "\"");
   gsm_port.print(config.apn);
@@ -989,7 +987,7 @@ int gsm_connect() {
             break;
           }
 #endif
-          addon_delay(100);
+          status_delay(100);
         } while (millis() - timer < CONNECT_TIMEOUT);
       }
       
@@ -1010,7 +1008,7 @@ int gsm_connect() {
       }
     }
 
-    addon_delay(2000); // wait 2s before retrying
+    status_delay(2000); // wait 2s before retrying
   }
   return ret;
 }
@@ -1159,7 +1157,6 @@ int gsm_send_http_current() {
   http_len += strlen(HTTP_HEADER1)+strlen(tmp_body_len)+strlen(HTTP_HEADER2);
 #endif
 
-  addon_event(ON_SEND_DATA);
   if (gsm_get_modem_status() == 4) {
     DEBUG_FUNCTION_PRINTLN("call interrupted");
     return 0; // abort
@@ -1194,7 +1191,6 @@ int gsm_send_http_current() {
   //validate header delivery
   gsm_validate_tcp();
 
-  addon_event(ON_SEND_DATA);
   if (gsm_get_modem_status() == 4) {
     DEBUG_FUNCTION_PRINTLN("call interrupted");
     return 0; // abort
@@ -1242,7 +1238,6 @@ int gsm_send_http_current() {
     // finish sending headers
     http_len = strlen(HTTP_HEADER1)+strlen(HTTP_HEADER2);
     
-    addon_event(ON_SEND_DATA);
     if (gsm_get_modem_status() == 4) {
       DEBUG_FUNCTION_PRINTLN("call interrupted");
       return 0; // abort
@@ -1294,7 +1289,6 @@ int gsm_send_data_current() {
     i += done;
     chunk_len = strlen(buf);
     
-    addon_event(ON_SEND_DATA);
     if (gsm_get_modem_status() == 4) {
       DEBUG_FUNCTION_PRINTLN("call interrupted");
       return 0; // abort
@@ -1342,8 +1336,6 @@ int gsm_send_data() {
   //make sure there is no connection
   gsm_disconnect();
 
-  addon_event(ON_SEND_STARTED);
-    
   //opening connection
   ret_tmp = gsm_connect();
   if(ret_tmp == 1) {
@@ -1359,13 +1351,10 @@ int gsm_send_data() {
   
   if(ret_tmp) {
     gsm_send_failures = 0;
-
-    addon_event(ON_SEND_COMPLETED);
   } else {
     DEBUG_PRINT("Error, can not send data or no connection.");
 
     gsm_send_failures++;
-    addon_event(ON_SEND_FAILED);
   }
 
   if(GSM_SEND_FAILURES_REBOOT > 0 && gsm_send_failures >= GSM_SEND_FAILURES_REBOOT) {
@@ -1419,8 +1408,6 @@ void gsm_get_reply(int fullBuffer) {
   if(index > 0) {
     DEBUG_PRINT("Modem Reply:");
     DEBUG_PRINTLN(modem_reply);
-
-    addon_event(ON_MODEM_REPLY);
   }
 }
 
@@ -1448,8 +1435,6 @@ void gsm_wait_for_reply(int allowOK, int fullBuffer, int maxseconds) {
     if(end > index) {
       DEBUG_PRINT("Modem Line:");
       DEBUG_PRINTLN(&modem_reply[index]);
-      
-      addon_event(ON_MODEM_REPLY);
   
       if (gsm_is_final_result(&modem_reply[index], allowOK)) {
         ret = 1;
