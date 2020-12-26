@@ -28,10 +28,9 @@ int data_index = 0;             //current data index (where last data record sto
 char time_char[24];             //time attached to every data line
 char modem_reply[200];          //data received from modem, max 200 chars
 uint32_t logindex = STORAGE_DATA_START;
-bool save_config = 0;           //flag to save config to flash
-bool power_reboot = 0;          //flag to reboot everything (used after new settings have been saved)
-bool power_cutoff = 0;          //flag to cut-off power to avoid deep-discharge (no more operational afterwards)
-bool low_power = 0;             //flag for low power mode
+bool save_config = false;       //flag to save config to flash
+bool power_reboot = false;      //flag to reboot everything (used after new settings have been saved)
+bool power_cutoff = false;      //flag to cut-off power to avoid deep-discharge (no more operational afterwards)
 
 char lat_current[15];
 char lon_current[15];
@@ -76,8 +75,8 @@ void setup() {
   device_init();
   battery_init();
 
-  // read-only settings check
-  settings_load(1);
+  // Load settings
+  settings_load();
 
   //setting debug serial port
   DEBUG_FUNCTION_CALL();
@@ -114,7 +113,6 @@ void setup() {
   // with a new SIM delete APN config and require a new one
   if (config.iccid[0] && settings_compare(offsetof(Settings, iccid), strlen(config.iccid))) {
     DEBUG_PRINTLN(F("New SIM detected!"));
-#ifdef KNOWN_APN_LIST
     // try with current APN first
     gsm_set_apn();
     // auto scanning of APN configuration
@@ -122,22 +120,6 @@ void setup() {
     if (ap) {
       settings_save(); // found good APN, save it as default
     }
-#if APN_RESET_WITH_NEW_SIM
-    else {
-      DEBUG_PRINTLN(F("Reset APN!"));
-      config.apn[0] = 0;
-      settings_save();
-    }
-#endif
-#else // no auto-APN scan
-#if APN_RESET_WITH_NEW_SIM
-    if (!first_boot) { // use configured APN at first boot (in tracker.h)
-      DEBUG_PRINTLN(F("Reset APN!"));
-      config.apn[0] = 0;
-      settings_save();
-    }
-#endif
-#endif
   }
 
   // do not proceed until APN configured
@@ -149,7 +131,6 @@ void setup() {
     if (save_config == 1) {
       //config should be saved
       settings_save();
-      save_config = 0;
     }
 
     if (power_cutoff) // apply cut-off
@@ -180,7 +161,6 @@ void loop() {
   if (save_config == 1) {
     //config should be saved
     settings_save();
-    save_config = 0;
   }
 
   if (power_reboot == 1) {

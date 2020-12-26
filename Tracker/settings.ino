@@ -13,13 +13,13 @@ void settings_load_defaults() {
   strlcpy(config.user, DEFAULT_USER, sizeof(config.user));
   strlcpy(config.pwd, DEFAULT_PASS, sizeof(config.pwd));
   strlcpy(config.alarm_phone, DEFAULT_ALARM_SMS, sizeof(config.alarm_phone));
-  save_config = 1;
 }
 
-int settings_load(int readonly) {
+bool settings_load() {
   //load all settings from EEPROM
   byte tmp;
-  static int defaults = 0;
+  bool defaults_loaded = false;
+  bool save_config = false;
 
   DEBUG_FUNCTION_CALL();
 
@@ -32,8 +32,9 @@ int settings_load(int readonly) {
     DEBUG_FUNCTION_PRINTLN("first run...");
     settings_load_defaults();
 
+    save_config = 1;
     config.has_run = false;
-    defaults = 1;
+    defaults_loaded = true;
   }
 
   //setting defaults in case something is incorrect
@@ -65,68 +66,63 @@ int settings_load(int readonly) {
   if(tmp == 255) { //this check is not sufficient
     DEBUG_FUNCTION_PRINTLN("key not found, setting default");
     strlcpy(config.key, KEY, sizeof(config.key));
-    save_config = 1;
+    save_config = true;
   }
 
   tmp = config.sms_key[0];
   if(tmp == 255) { //this check is not sufficient
     DEBUG_FUNCTION_PRINTLN("SMS key not found, setting default");
     strlcpy(config.sms_key, SMS_KEY, sizeof(config.sms_key));
-    save_config = 1;
+    save_config = true;
   }
 
   tmp = config.sim_pin[0];
   if(tmp == 255) { //this check is not sufficient
     DEBUG_FUNCTION_PRINTLN("SIM pin not found, setting default");
     strlcpy(config.sim_pin, SIM_PIN, sizeof(config.sim_pin));
-    save_config = 1;
+    save_config = true;
   }
 
   tmp = config.apn[0];
   if(tmp == 255) {
     DEBUG_FUNCTION_PRINTLN("APN not set, setting default");
     strlcpy(config.apn, DEFAULT_APN, sizeof(config.apn));
-    save_config = 1;
+    save_config = true;
   }
 
   tmp = config.user[0];
   if(tmp == 255) {
     DEBUG_FUNCTION_PRINTLN("APN user not set, setting default");
     strlcpy(config.user, DEFAULT_USER, sizeof(config.user));
-    save_config = 1;
+    save_config = true;
   }
 
   tmp = config.pwd[0];
   if(tmp == 255) {
     DEBUG_FUNCTION_PRINTLN("APN password not set, setting default");
     strlcpy(config.pwd, DEFAULT_PASS, sizeof(config.pwd));
-    save_config = 1;
+    save_config = true;
   }
 
   tmp = config.alarm_phone[0];
   if(tmp == 255) {
     DEBUG_FUNCTION_PRINTLN("Alarm SMS number not set, setting default");
     strlcpy(config.alarm_phone, DEFAULT_ALARM_SMS, sizeof(config.alarm_phone));
-    save_config = 1;
+    save_config = true;
   }
 
-  if (readonly)
-    save_config = 0;
-    
   if (save_config == 1)
     settings_save();
-  return defaults;
+  return defaults_loaded;
 }
 
-int settings_load() {
-  return settings_load(0);
-}
 
 void settings_save() {
   DEBUG_FUNCTION_CALL();
 
   //save all settings to flash
   dueFlashStorage.write(STORAGE_CONFIG_MAIN, (byte*)&config, sizeof(Settings));
+  save_config = false;
 }
 
 int settings_compare(size_t offset, size_t len) {

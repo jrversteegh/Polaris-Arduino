@@ -75,10 +75,9 @@
 #define URL "/api/v1/%s/telemetry"
 #define URL_FORMAT_ARGS get_access_token()
 
-
-#define DEFAULT_APN   "internet"      //default APN
-#define DEFAULT_USER  ""              //default APN user
-#define DEFAULT_PASS  ""              //default APN pass
+#define DEFAULT_APN   "live.vodafone.nl" //default APN
+#define DEFAULT_USER  "vodafone"         //default APN user
+#define DEFAULT_PASS  "vodafone"         //default APN pass
 
 #define DEFAULT_ALARM_ON   0          //if active SMS will be sent on Ignition ON/OFF
 #define DEFAULT_ALARM_SMS  ""         //default SMS text for alarm
@@ -100,11 +99,10 @@
 
 // List of APN configurations to scan at power-on/reset
 // (undefine to use the default APN only)
-/*
 #define KNOWN_APN_LIST \
-  KNOWN_APN("example.apn", "user", "pass", "ISP name", NULL) \
-  RECORD FORMAT (ISP and NULL are not used) - INSERT ABOVE
-*/
+  KNOWN_APN("live.vodafone.nl", "vodafone", "vodafone", "Vodafone", NULL) \
+  KNOWN_APN("sphone.pelephone.net.il", "pcl@3g", "pcl", "Sphone Pelephone", NULL) \
+  //RECORD FORMAT (ISP and NULL are not used) - INSERT ABOVE
 
 #define KNOWN_APN_SCAN_MODE 1       // 0=check GPRS context only, 2=attempt only server connection, 1=use both in sequence
 #define KNOWN_APN_SCAN_USE_RESET 0  // 1=reset modem to change APN, 0=change APN without reset
