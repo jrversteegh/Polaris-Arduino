@@ -295,11 +295,7 @@ void sms_cmd_run(char *cmd, char *phone) {
   if(strcmp(cmd, "locate") == 0) {
     DEBUG_FUNCTION_PRINTLN("Locate command detected");
 
-    if(LOCATE_COMMAND_FORMAT_IOS) {
-      snprintf(msg,sizeof(msg),"comgooglemaps://?center=%s,%s",lat_current,lon_current);
-    } else {
-      snprintf(msg,sizeof(msg),"https://maps.google.com/maps/place/%s,%s",lat_current,lon_current);
-    }
+    snprintf(msg,sizeof(msg),"https://maps.google.com/maps/place/%s,%s",lat_current,lon_current);
     sms_send_msg(msg, phone);
   }
   else
@@ -355,26 +351,6 @@ void sms_cmd_run(char *cmd, char *phone) {
     }
   }
 #endif
-  else
-  if(strcmp(cmd, "powersave") == 0) {
-    DEBUG_FUNCTION_PRINT("New Powersave=");
-    DEBUG_PRINTLN(tmp);
-    if(strcmp(tmp, "off") == 0) {
-      config.powersave = 0;
-      save_config = 1;
-    } else if(strcmp(tmp, "on") == 0) {
-      config.powersave = 1;
-      save_config = 1;
-    }
-    else
-      DEBUG_FUNCTION_PRINTLN("invalid value");
-    //send SMS reply
-    if (config.powersave == 1) {
-      sms_send_msg("Powersave ON", phone);
-    } else {
-      sms_send_msg("Powersave OFF", phone);
-    }
-  }
 }
 
 void sms_send_msg(const char *cmd, const char *phone) {

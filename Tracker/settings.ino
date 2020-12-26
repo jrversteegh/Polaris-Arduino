@@ -7,17 +7,13 @@ int settings_load(int readonly) {
   DEBUG_FUNCTION_CALL();
 
   byte* b = dueFlashStorage.readAddress(STORAGE_CONFIG_MAIN); // byte array which is read from flash at adress
-  memcpy(&config, b, sizeof(settings)); // copy byte array to temporary struct
+  memcpy(&config, b, sizeof(Settings)); // copy byte array to temporary struct
 
-  DEBUG_FUNCTION_PRINT("First run flag=");
-  DEBUG_PRINTLN(config.first_run);
 
-  if(config.first_run != 1) {
+  if(!config.has_run) {
     //first run was not set, this is first even run of the board use config from tracker.h
     DEBUG_FUNCTION_PRINTLN("first run, using defaults");
     config.interval = INTERVAL;
-    config.interval_send = INTERVAL_SEND;
-    config.powersave = POWERSAVE;
     config.alarm_on =  DEFAULT_ALARM_ON;
     config.debug = DEBUG ? 1 : 0;
 
@@ -29,7 +25,7 @@ int settings_load(int readonly) {
     strlcpy(config.pwd, DEFAULT_PASS, sizeof(config.pwd));
     strlcpy(config.alarm_phone, DEFAULT_ALARM_SMS, sizeof(config.alarm_phone));
 
-    config.first_run = 1;  //set first run flag
+    config.has_run = false;
     save_config = 1;
     defaults = 1;
   }
@@ -47,33 +43,6 @@ int settings_load(int readonly) {
     DEBUG_PRINTLN(config.interval);
   }
 
-  //interval send
-  DEBUG_FUNCTION_PRINT("config.interval_send=");
-  DEBUG_PRINTLN(config.interval_send);
-
-  if((config.interval_send == -1) || (config.interval_send < 0) || (config.interval_send > 100)) {
-    DEBUG_FUNCTION_PRINTLN("interval_send not found, setting default");
-    config.interval_send = INTERVAL_SEND;
-    save_config = 1;
-
-    DEBUG_FUNCTION_PRINT("set config.interval_send=");
-    DEBUG_PRINTLN(config.interval_send);
-  }
-
-  //powersave
-  DEBUG_FUNCTION_PRINT("config.powersave=");
-  DEBUG_PRINTLN(config.powersave);
-
-  if((config.powersave != 1) && (config.powersave != 0)) {
-    DEBUG_FUNCTION_PRINTLN("powersave not found, setting default");
-    config.powersave = POWERSAVE;
-    save_config = 1;
-
-    DEBUG_FUNCTION_PRINT("set config.powersave=");
-    DEBUG_PRINTLN(config.powersave);
-  }
-
-  //powersave
   DEBUG_FUNCTION_PRINT("config.debug=");
   DEBUG_PRINTLN(config.debug);
 
@@ -151,7 +120,7 @@ void settings_save() {
   DEBUG_FUNCTION_CALL();
 
   //save all settings to flash
-  dueFlashStorage.write(STORAGE_CONFIG_MAIN, (byte*)&config, sizeof(settings));
+  dueFlashStorage.write(STORAGE_CONFIG_MAIN, (byte*)&config, sizeof(Settings));
 }
 
 int settings_compare(size_t offset, size_t len) {

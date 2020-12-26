@@ -245,7 +245,7 @@ void send_data() {
   DEBUG_PRINTLN(interval_count);
   
   // send accumulated data
-  if (interval_count >= config.interval_send) {
+  if (interval_count >= 1) {
     // if data send disabled, use storage
     if (!SEND_DATA) {
       DEBUG_PRINT("Data send is turned off.");
@@ -267,6 +267,6 @@ void send_data() {
     
     //reset current data and counter
     data_reset();
-    interval_count -= config.interval_send;
+    interval_count -= 1;
   }
 }

@@ -1,12 +1,8 @@
 //OpenTracker config
 #define DEBUG 1               //debug console (0=disabled, 1=send diangostic messages, 2=also accept test commands)
 
-#define ALWAYS_ON 0           //set to 1 to make the tracker log even with the ignition off
-
 //default settings (can be overwritten and stored in EEPRom)
 #define INTERVAL  15000        //how often to collect data (milli sec, 600000 - 10 mins)
-#define INTERVAL_SEND 1       //how many times to collect data before sending (times), sending interval interval*interval_send (4 default)
-#define POWERSAVE 0           //enable power saving mode with engine off (turn off modem data session, slow down CPU)
 #define KEY "key"             //key for connection, will be sent with every data transmission - max 12 chars
 #define DATA_LIMIT 2500       //current data limit, data collected before sending to remote server can not exceed this
 #define SMS_KEY "pass"        //default password for SMS auth
@@ -41,8 +37,6 @@
 #define GSM_NETWORK_SEARCH_TIMEOUT 60000    // can be up to several minutes for first time NB-IoT
 
 #define GPS_COLLECT_TIMEOUT       4         // max time spent looking for a GPS fix (seconds)
-
-#define ENGINE_RUNNING_LOG_FAST_AS_POSSIBLE 0 // 1=when the engine is running send interval is ignored
 
 #define DATA_INCLUDE_GPS_DATE 1             // enable to include the GPS date in the POST string
 #define DATA_INCLUDE_GPS_TIME 1             // enable to include the GPS time in the POST string

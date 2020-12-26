@@ -48,13 +48,12 @@ int gsm_send_failures = 0;
 int gsm_reply_failures = 0;
 
 //settings structure
-struct settings {
-  byte first_run;         //set to 1 after first run
+struct Settings {
+  bool has_run;
   char apn[64];
   char user[20];
   char pwd[20];
   long interval;          //how often to collect data (milli sec, 600000 - 10 mins)
-  int interval_send;      //how many times to collect data before sending (times), sending interval interval*interval_send
   char key[12];           //key for connection, will be sent with every data transmission
   char sim_pin[5];        //PIN for SIM card
   char sms_key[12];       //password for SMS commands
@@ -63,10 +62,9 @@ struct settings {
   byte alarm_on;
   char alarm_phone[20];   //alarm phone number
   byte debug;             //flag to enable/disable debug console (USB)
-  byte powersave;         //flag to enable/disable low power mode (with engine off)
 };
 
-settings config;
+Settings config;
 
 //define serial ports
 #define gps_port Serial1
@@ -113,7 +111,7 @@ void setup() {
   data_reset();
 
   // with a new SIM delete APN config and require a new one
-  if (config.iccid[0] && settings_compare(offsetof(settings, iccid), strlen(config.iccid))) {
+  if (config.iccid[0] && settings_compare(offsetof(Settings, iccid), strlen(config.iccid))) {
     DEBUG_PRINTLN(F("New SIM detected!"));
 #ifdef KNOWN_APN_LIST
     // try with current APN first
@@ -200,50 +198,44 @@ void loop() {
   DEBUG_PRINTLN(IGNT_STAT);
 
   // detect transitions from engine on and off
-  if (!ALWAYS_ON) {
-    if (IGNT_STAT == 0) {
-      if (engineRunning != 0) {
-        // engine started
-        engine_start = millis();
-        engineRunning = 0;
+  if (IGNT_STAT == 0) {
+    if (engineRunning != 0) {
+      // engine started
+      engine_start = millis();
+      engineRunning = 0;
 
+      if (config.alarm_on == 1) {
+        sms_send_msg("Ignition ON", config.alarm_phone);
+      }
+      // restore full speed for serial communication
+      cpu_full_speed();
+      gsm_open();
+      // restart sending data
+      collect_all_data(IGNT_STAT);
+      send_data();
+    }
+  } else {
+    if (engineRunning != 1) {
+      // engine stopped
+      if (engineRunning == 0) {
+        engineRunningTime += (millis() - engine_start);
         if (config.alarm_on == 1) {
-          sms_send_msg("Ignition ON", config.alarm_phone);
+          sms_send_msg("Ignition OFF", config.alarm_phone);
         }
-        if (config.powersave == 1) {
-          // restore full speed for serial communication
-          cpu_full_speed();
-          gsm_open();
-        }
-        // restart sending data
+        // force sending last data
+        interval_count = 1;
         collect_all_data(IGNT_STAT);
         send_data();
       }
-    } else {
-      if (engineRunning != 1) {
-        // engine stopped
-        if (engineRunning == 0) {
-          engineRunningTime += (millis() - engine_start);
-          if (config.alarm_on == 1) {
-            sms_send_msg("Ignition OFF", config.alarm_phone);
-          }
-          // force sending last data
-          interval_count = config.interval_send;
-          collect_all_data(IGNT_STAT);
-          send_data();
-        }
-        engineRunning = 1;
-        // save power when engine is off
-        gsm_deactivate(); // ~20mA less
-        if (config.powersave == 1) {
-          gsm_close();
-          cpu_slow_down(); // ~20mA less
-        }
-      }
+      engineRunning = 1;
+      // save power when engine is off
+      gsm_deactivate(); // ~20mA less
+      gsm_close();
+      cpu_slow_down(); // ~20mA less
     }
   }
 
-  if (!ENGINE_RUNNING_LOG_FAST_AS_POSSIBLE || ALWAYS_ON || !SEND_DATA) {
+  if (!SEND_DATA) {
     time_stop = millis();
 
     //signed difference is good if less than MAX_LONG
@@ -261,7 +253,7 @@ void loop() {
         status_delay(1000);
         time_diff -= 1000;
         // break earlier if ignition status changed
-        if (!ALWAYS_ON && IGNT_STAT != digitalRead(PIN_S_DETECT))
+        if (IGNT_STAT != digitalRead(PIN_S_DETECT))
           time_diff = 0;
       }
       status_delay(time_diff);
@@ -273,11 +265,8 @@ void loop() {
   //start counting time
   time_start = millis();
 
-  if (ALWAYS_ON || IGNT_STAT == 0) {
-    if (IGNT_STAT == 0) {
-      DEBUG_PRINTLN("Ignition is ON!");
-      // Insert here only code that should be processed when Ignition is ON
-    }
+  if (IGNT_STAT == 0) {
+    DEBUG_PRINTLN("Ignition is ON!");
 
     //collecting GPS data
     collect_all_data(IGNT_STAT);
@@ -303,19 +292,15 @@ void loop() {
     if (++sms_check_count >= SMS_CHECK_INTERVAL_COUNT) {
       sms_check_count = 0;
 
-      if (config.powersave == 1) {
-        // restore full speed for serial communication
-        cpu_full_speed();
-        gsm_open();
-      }
+      // restore full speed for serial communication
+      cpu_full_speed();
+      gsm_open();
 
       sms_check();
 
-      if (config.powersave == 1) {
-        // back to power saving
-        gsm_close();
-        cpu_slow_down();
-      }
+      // back to power saving
+      gsm_close();
+      cpu_slow_down();
     }
 #endif
   }
