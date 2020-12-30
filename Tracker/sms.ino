@@ -299,13 +299,6 @@ void sms_cmd_run(char *cmd, char *phone) {
     sms_send_msg(msg, phone);
   }
   else
-  if(strcmp(cmd, "tomtom") == 0) {
-    DEBUG_FUNCTION_PRINTLN("TomTom command detected");
-
-    snprintf(msg,sizeof(msg),"tomtomhome://geo:lat=%s&long=%s",lat_current,lon_current);
-    sms_send_msg(msg, phone);
-  }
-  else
   if(strcmp(cmd, "data") == 0) {
     DEBUG_FUNCTION_PRINT("New Data=");
     DEBUG_PRINTLN(tmp);
@@ -327,30 +320,6 @@ void sms_cmd_run(char *cmd, char *phone) {
     snprintf(msg,sizeof(msg),"IMEI: %s",config.imei);
     sms_send_msg(msg, phone);
   }
-#if DEBUG
-  else
-  if(strcmp(cmd, "debug") == 0) {
-    DEBUG_FUNCTION_PRINT("New Debug=");
-    DEBUG_PRINTLN(tmp);
-    if(strcmp(tmp, "off") == 0) {
-      config.debug = 0;
-      save_config = 1;
-    } else if(strcmp(tmp, "on") == 0) {
-      config.debug = 1;
-      save_config = 1;
-    }
-    else
-      DEBUG_FUNCTION_PRINTLN("invalid value");
-    //send SMS reply
-    if (config.debug == 1) {
-      usb_console_restore();
-      sms_send_msg("Debug ON", phone);
-    } else {
-      sms_send_msg("Debug OFF", phone);
-      usb_console_disable();
-    }
-  }
-#endif
 }
 
 void sms_send_msg(const char *cmd, const char *phone) {
