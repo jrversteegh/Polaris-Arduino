@@ -226,25 +226,6 @@ void sms_cmd_run(char *cmd, char *phone) {
     sms_send_msg("SMS password saved", phone);
   }
   else
-  //PIN
-  if(strcmp(cmd, "pin") == 0) {
-    //setting new APN
-    DEBUG_FUNCTION_PRINT("New pin=");
-    DEBUG_PRINTLN(tmp);
-
-    //updating pin in config
-    strlcpy(config.sim_pin, tmp, sizeof(config.sim_pin));
-
-    DEBUG_PRINT("New sim_pin configured: ");
-    DEBUG_PRINTLN(config.sim_pin);
-
-    save_config=1;
-    power_reboot=1;
-
-    //send SMS reply
-    sms_send_msg("SIM pin saved", phone);
-  }
-  else
   //alarm
   if(strcmp(cmd, "alarm") == 0) {
     //setting alarm
