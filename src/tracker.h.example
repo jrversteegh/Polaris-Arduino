@@ -1,0 +1,69 @@
+//OpenTracker config
+#define DEBUG 1               //debug console (0=disabled, 1=send diangostic messages, 2=also accept test commands)
+#define CONFIG_VERSION 1      //version of configuration struct
+
+//default settings (can be overwritten and stored in EEPRom)
+#define SLEEP_INTERVAL  15000 //how often to collect data in sleep mode (milli sec, 600000 - 10 mins)
+#define ACTIVE_INTERVAL 1000  //how often to collect data in active mode (milli sec, 600000 - 10 mins)
+#define KEY "key"             //key for connection, will be sent with every data transmission - max 12 chars
+#define SMS_KEY "pass"        //default password for SMS auth
+#define SIM_PIN ""            //default SIM PIN (none)
+
+#define GSM_USE_NTP_SERVER "pool.ntp.org"   // use Network Time Protocol server for modem clock update (undefine to disable)
+#define GSM_NTP_COMMAND_TIMEOUT 5           // max seconds to wait for NTP synchronization result
+
+#define GSM_MODEM_COMMAND_TIMEOUT 10
+
+//#define GSM_USE_CUSTOM_DNS "8.8.8.8"        // undefine to keep default DNS assigned by network
+
+//#define GSM_USE_GSM_BAND ALL_GSM_BAND       // use only selected radio bands (combine GSM_BAND_ + 850,900,1800,1900)
+//#define GSM_USE_CATM1_BAND ALL_CATM1_BAND   // use only selected radio bands (combine LTE_BAND_ + B1,B2,B3,B4,B5,B8,B12,B13,B18,B19,B20,B26,B28,B39)
+//#define GSM_USE_CATNB1_BAND ALL_CATNB1_BAND // use only selected radio bands (combine LTE_BAND_ + B1,B2,B3,B4,B5,B8,B12,B13,B18,B19,B20,B26,B28)
+
+//Example for Cat-NB1 with Vodafone
+//#define GSM_USE_CATNB1_BAND LTE_BAND_B20
+//#define GSM_SCAN_MODE 3                     // undefined or 0=Auto, 1=GSM Only, 3=LTE Only
+//#define GSM_SCAN_SEQUENCE 030201            // octal format (01=GSM, 02=LTE Cat-M1, 03=LTE Cat-NB1)
+//#define GSM_SCAN_LTE_MODE 1                 // undefined or 2=Both, 0=Cat-M1, 1=Cat-NB1
+
+#define GSM_NETWORK_SEARCH_TIMEOUT 60000      // can be up to several minutes for first time NB-IoT
+
+#define GPS_TIMEOUT_ACTIVE       4   // max time spent looking for a GPS fix (seconds)
+#define GPS_TIMEOUT_SLEEPING     60  // max time spent looking for a GPS fix (seconds)
+
+#define HTTP_USER_AGENT "OrcaPolaris 1.0"
+
+#define PROTO "TCP"
+#define HOSTNAME "cloud.orca-st.com"
+#define HTTP_PORT "80"
+#define URL "/api/v1/telemetry?key=%s"
+
+#define DEFAULT_APN   "live.vodafone.nl" //default APN
+#define DEFAULT_USER  "vodafone"         //default APN user
+#define DEFAULT_PASS  "vodafone"         //default APN pass
+
+#define DEFAULT_ALARM_ON   0          //if active SMS will be sent on Ignition ON/OFF
+#define DEFAULT_ALARM_SMS  ""         //default SMS text for alarm
+
+#define PACKET_SIZE 1400              //TCP data chunk size, modem accept max 1460 bytes per send
+#define PACKET_SIZE_DELIVERY 3000     //in case modem has this number of bytes undelivered, wait till sending new data (3000 bytes default, max sending TCP buffer is 7300)
+
+#define CONNECT_RETRY 3               //how many times to retry connecting to remote server
+#define CONNECT_TIMEOUT 2000          //how much time to wait for each connection attempt
+#define SERVER_REPLY_TIMEOUT 2000     //how much to wait for server reply
+
+#define STORAGE 1                     //save logs in flash storage
+#define STORAGE_CONFIG_MAIN 0         //flash index to store configuration
+#define STORAGE_DATA_START 2048       //starting flash index to store logs (first bytes reserved for configuration)
+#define STORAGE_DATA_END 131071       //the last possible flash index (max 131072, one last byte must be reserved for marker)
+
+// List of APN configurations to scan at power-on/reset
+// (undefine to use the default APN only)
+#define KNOWN_APN_LIST \
+  KNOWN_APN("live.vodafone.nl", "vodafone", "vodafone", "Vodafone", NULL) \
+  KNOWN_APN("sphone.pelephone.net.il", "pcl@3g", "pcl", "Sphone Pelephone", NULL) \
+  //RECORD FORMAT (ISP and NULL are not used) - INSERT ABOVE
+
+#define KNOWN_APN_SCAN_MODE 1       // 0=check GPRS context only, 2=attempt only server connection, 1=use both in sequence
+#define KNOWN_APN_SCAN_USE_RESET 0  // 1=reset modem to change APN, 0=change APN without reset
+
